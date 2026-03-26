@@ -1,7 +1,6 @@
 import numpy as np
 from typing import List
 
-
 # Блок 1: Конструктивное число
 class ConstructiveNumber:
     """
@@ -12,9 +11,9 @@ class ConstructiveNumber:
     между которыми "сидит" настоящее число. Точность (ширина интервала) ε = b - a
 
     Параметр α ∈ [0, 1] позволяет получить конкретное значение:
-      - при α=0 -> возвращаем a (левую границу)
-      - при α=1 -> возвращаем b (правую границу)
-      - при α=0.5 -> возвращаем середину интервала
+    - при α=0 -> возвращаем a (левую границу)
+    - при α=1 -> возвращаем b (правую границу)
+    - при α=0.5 -> возвращаем середину интервала
     """
 
     def __init__(self, a: float, b: float):
@@ -46,7 +45,7 @@ class ConstructiveNumber:
         """Получить конкретное вещественное число из интервала."""
         if not (0.0 <= alpha <= 1.0):
             raise ValueError("alpha must be in [0, 1]")
-        return self.a + alpha * (self.b - self.a)  # a + alpha * (b - a)
+        return self.a + alpha * (self.b - self.a) # a + alpha * (b - a)
 
     # 1.1 Арифметические операции
     # При арифметике интервалов правила такие:
@@ -148,7 +147,7 @@ class ConstructiveNumber:
 
     def __lt__(self, other):
         if isinstance(other, ConstructiveNumber):
-            return self.b < other.a  # интервальная логика
+            return self.b < other.a # интервальная логика
         else:
             return self.b < float(other)
 
@@ -185,9 +184,9 @@ class ConstructiveNumber:
             return ConstructiveNumber(0.0, max(abs(self.a), abs(self.b)))
         else:
             return ConstructiveNumber(
-                min(abs(self.a), abs(self.b)), max(abs(self.a), abs(self.b))
+                min(abs(self.a), abs(self.b)),
+                max(abs(self.a), abs(self.b))
             )
-
 
 # Вспомогательная функция: оборачиваем список обычных float в конструктивные числа
 def to_constructive(point: List[float], eps: float = 1e-6) -> List[ConstructiveNumber]:
@@ -195,20 +194,14 @@ def to_constructive(point: List[float], eps: float = 1e-6) -> List[ConstructiveN
     Конвертируем список обычных чисел в список конструктивных с заданной точностью ε,
     где point: список координат (обычные числа), eps: ширина интервала (погрешность)
     """
-    return [
-        ConstructiveNumber.from_real(x, eps) for x in point
-    ]  # список конструктивных чисел
+    return [ConstructiveNumber.from_real(x, eps) for x in point] # список конструктивных чисел
 
-
-def from_constructive(
-    point: List[ConstructiveNumber], alpha: float = 0.5
-) -> List[float]:
+def from_constructive(point: List[ConstructiveNumber], alpha: float = 0.5) -> List[float]:
     """
     Конвертируем список конструктивных чисел обратно в обычные float,
     где point: список конструктивных чисел, alpha: параметр для get_value (0=нижняя граница, 1=верхняя, 0.5=середина).
     """
-    return [x.get_value(alpha) for x in point]  # список обычных чисел
-
+    return [x.get_value(alpha) for x in point] # список обычных чисел
 
 # Блок 2: Чёрные ящики
 class BlackBox:
@@ -216,10 +209,10 @@ class BlackBox:
     Базовый класс для тестовых функций оптимизации.
 
     У каждого ящика единый интерфейс:
-      - __call__(x) - вычислить значение функции
-      - gradient(x) - вычислить градиент (вектор частных производных)
-      - call_count - счётчик вызовов функции
-      - grad_count - счётчик вызовов градиента
+    - __call__(x) - вычислить значение функции
+    - gradient(x) - вычислить градиент (вектор частных производных)
+    - call_count - счётчик вызовов функции
+    - grad_count - счётчик вызовов градиента
 
     Совместим с конструктивными числами:
     если передать список ConstructiveNumber, вернём ConstructiveNumber.
@@ -240,9 +233,7 @@ class BlackBox:
     def _check_dim(self, x):
         """Проверяем, что размерность входного вектора совпадает с ожидаемой."""
         if len(x) != self.n_dim:
-            raise ValueError(
-                f"{self.name}: ожидалась размерность {self.n_dim}, получено {len(x)}"
-            )
+            raise ValueError(f"{self.name}: ожидалась размерность {self.n_dim}, получено {len(x)}")
 
     def __call__(self, x):
         """
@@ -259,11 +250,7 @@ class BlackBox:
 
         self._check_dim(x)
 
-        if (
-            isinstance(x, (list, tuple))
-            and len(x) > 0
-            and isinstance(x[0], ConstructiveNumber)
-        ):
+        if isinstance(x, (list, tuple)) and len(x) > 0 and isinstance(x[0], ConstructiveNumber):
             return self._evaluate_constructive(x)
 
         return self._evaluate_numeric(np.array(x, dtype=float))
@@ -295,7 +282,6 @@ class BlackBox:
 
     def _hessian(self, x):
         raise NotImplementedError("Подкласс должен реализовать _hessian")
-
 
 class QuadraticWellConditioned(BlackBox):
     """
@@ -336,7 +322,6 @@ class QuadraticWellConditioned(BlackBox):
         """Матрица Гессе - диагональная, так как переменные независимы."""
         return np.diag(2.0 * self.coeffs)
 
-
 class QuadraticPoorConditioned(BlackBox):
     """
     Квадратичная функция 4-мерная с плохим числом обусловленности (≈ 100).
@@ -371,7 +356,6 @@ class QuadraticPoorConditioned(BlackBox):
     def _hessian(self, x):
         return np.diag(2.0 * self.coeffs)
 
-
 class RosenbrockFunction(BlackBox):
     """
     Функция Розенброка 3-мерная.
@@ -393,29 +377,29 @@ class RosenbrockFunction(BlackBox):
         return float(term1 + term2)
 
     def _evaluate_constructive(self, x):
-        """
-        Для простоты используем обычное численное вычисление,
-        так как реализация через интервалы сложнее.
-        """
-        return self._evaluate_numeric(x)
+      x0, x1, x2 = x[0], x[1], x[2]
+      t1 = (ConstructiveNumber(1.0, 1.0) - x0) * (ConstructiveNumber(1.0, 1.0) - x0)
+      t2 = ConstructiveNumber(100.0, 100.0) * (x1 - x0 * x0) * (x1 - x0 * x0)
+      t3 = (ConstructiveNumber(1.0, 1.0) - x1) * (ConstructiveNumber(1.0, 1.0) - x1)
+      t4 = ConstructiveNumber(100.0, 100.0) * (x2 - x1 * x1) * (x2 - x1 * x1)
+      return t1 + t2 + t3 + t4
 
     def _gradient(self, x):
         x0, x1, x2 = x[0], x[1], x[2]
-        df_dx0 = -2.0 * (1.0 - x0) - 400.0 * x0 * (x1 - x0**2)
-        df_dx1 = 200.0 * (x1 - x0**2) - 2.0 * (1.0 - x1) - 400.0 * x1 * (x2 - x1**2)
-        df_dx2 = 200.0 * (x2 - x1**2)
+        df_dx0 = -2.0 * (1.0 - x0) - 400.0 * x0 * (x1 - x0 ** 2)
+        df_dx1 = 200.0 * (x1 - x0 ** 2) - 2.0 * (1.0 - x1) - 400.0 * x1 * (x2 - x1 ** 2)
+        df_dx2 = 200.0 * (x2 - x1 ** 2)
         return np.array([df_dx0, df_dx1, df_dx2])
 
     def _hessian(self, x):
         x0, x1, x2 = x[0], x[1], x[2]
-        H = np.zeros((3, 3))
-        H[0, 0] = 2 - 400 * x1 + 1200 * x0**2
-        H[0, 1] = H[1, 0] = -400 * x0
-        H[1, 1] = 202 - 400 * x2 + 1200 * x1**2
-        H[1, 2] = H[2, 1] = -400 * x1
-        H[2, 2] = 200
+        H = np.zeros((3,3))
+        H[0,0] = 2 - 400*x1 + 1200*x0**2
+        H[0,1] = H[1,0] = -400*x0
+        H[1,1] = 202 - 400*x2 + 1200*x1**2
+        H[1,2] = H[2,1] = -400*x1
+        H[2,2] = 200
         return H
-
 
 # Блок 3: Методы оптимизации
 class OptimizationResult:
@@ -428,16 +412,15 @@ class OptimizationResult:
     - историю движения (trajectory)
     - информацию о сходимости метода
     """
-
     def __init__(
-        self,
-        x_opt: np.ndarray,  # найденный минимум
-        f_opt: float,  # значение функции в минимуме
-        n_iterations: int,  # число итераций
-        history_x: List[np.ndarray],  # траектория точек (все итерации)
-        history_f: List[float],  # значения функции по итерациям
-        converged: bool,  # сошёлся ли метод
-        method_name: str,
+            self,
+            x_opt: np.ndarray, # найденный минимум
+            f_opt: float, # значение функции в минимуме
+            n_iterations: int, # число итераций
+            history_x: List[np.ndarray], # траектория точек (все итерации)
+            history_f: List[float], # значения функции по итерациям
+            converged: bool, # сошёлся ли метод
+            method_name: str,
     ):
         self.x_opt = x_opt
         self.f_opt = f_opt
@@ -454,16 +437,15 @@ class OptimizationResult:
             f"f(x*) = {self.f_opt:.6g}"
         )
 
-
 class NelderMead:
     def __init__(
-        self,
-        tol: float = 1e-6,
-        max_iter: int = 10000,
-        alpha: float = 1.0,
-        gamma: float = 2.0,
-        rho: float = 0.5,
-        sigma: float = 0.5,
+            self,
+            tol: float = 1e-6,
+            max_iter: int = 10000,
+            alpha: float = 1.0,
+            gamma: float = 2.0,
+            rho: float = 0.5,
+            sigma: float = 0.5,
     ):
         self.tol = tol
         self.max_iter = max_iter
@@ -473,10 +455,10 @@ class NelderMead:
         self.sigma = sigma
 
     def optimize(
-        self,
-        func: BlackBox,
-        x_start: np.ndarray,
-        initial_step: float = 0.5,
+            self,
+            func: BlackBox,
+            x_start: np.ndarray,
+            initial_step: float = 0.5,
     ) -> OptimizationResult:
         """
         Метод Нелдера-Мида (симплекс-метод, без градиентов).
@@ -570,16 +552,15 @@ class NelderMead:
             method_name="Нелдер-Мид (0-й порядок)",
         )
 
-
 class GradientDescent:
     def __init__(
-        self,
-        lr: float = 0.01,
-        lr_strategy: str = "fixed",
-        tol: float = 1e-6,
-        max_iter: int = 10000,
-        backtrack_beta: float = 0.5,
-        backtrack_c: float = 1e-4,
+            self,
+            lr: float = 0.01,
+            lr_strategy: str = "fixed",
+            tol: float = 1e-6,
+            max_iter: int = 10000,
+            backtrack_beta: float = 0.5,
+            backtrack_c: float = 1e-4,
     ):
         if lr_strategy not in {"fixed", "backtracking"}:
             raise ValueError("lr_strategy must be 'fixed' or 'backtracking'")
@@ -592,9 +573,9 @@ class GradientDescent:
         self.backtrack_c = backtrack_c
 
     def optimize(
-        self,
-        func: BlackBox,
-        x_start: np.ndarray,
+            self,
+            func: BlackBox,
+            x_start: np.ndarray,
     ) -> OptimizationResult:
         """
         Градиентный спуск.
@@ -616,14 +597,14 @@ class GradientDescent:
             grad_norm = np.linalg.norm(grad)
 
             if grad_norm < self.tol:
-                # Критерий остановки: норма градиента меньше tol
-                converged = True
-                break
+              # Критерий остановки: норма градиента меньше tol
+              converged = True
+              break
 
             if len(history_f) > 1 and abs(history_f[-1] - history_f[-2]) < self.tol:
-                # Критерий стационарности: изменение функции меньше tol
-                converged = True
-                break
+              # Критерий стационарности: изменение функции меньше tol
+              converged = True
+              break
 
             if self.lr_strategy == "backtracking":
                 step = self._backtracking_line_search(func, x, grad)
@@ -647,10 +628,10 @@ class GradientDescent:
         )
 
     def _backtracking_line_search(
-        self,
-        func: BlackBox,
-        x: np.ndarray,
-        grad: np.ndarray,
+            self,
+            func: BlackBox,
+            x: np.ndarray,
+            grad: np.ndarray,
     ) -> float:
         """
         Поиск шага методом backtracking (условие Армихо).
@@ -662,15 +643,12 @@ class GradientDescent:
         f_current = float(func(x))
         grad_sq = np.dot(grad, grad)
 
-        while (
-            float(func(x - step * grad)) > f_current - self.backtrack_c * step * grad_sq
-        ):
+        while float(func(x - step * grad)) > f_current - self.backtrack_c * step * grad_sq:
             step *= self.backtrack_beta
             if step < 1e-15:
                 break
 
         return step
-
 
 class NewtonMethod:
     def __init__(self, tol: float = 1e-7, max_iter: int = 50, lr: float = 1.0):

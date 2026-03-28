@@ -4,7 +4,7 @@ import numpy as np
 from typing import Any, Optional, List
 from tabulate import tabulate
 import matplotlib.pyplot as plt
-#from model import ConstructiveNumber, to_constructive
+from model import ConstructiveNumber, to_constructive
 
 def seed_everything(seed: int = 42):
     random.seed(seed)
